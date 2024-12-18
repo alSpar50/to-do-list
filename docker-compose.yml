@@ -1,0 +1,74 @@
+version: '3.8'  # Możesz usunąć wersję, jeśli Docker Compose to zaleca
+
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: laravel-app
+        container_name: laravel-app
+        restart: unless-stopped
+        working_dir: /var/www
+        volumes:
+            - .:/var/www
+            - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+        networks:
+            - laravel
+        depends_on:
+            - db
+
+    webserver:
+        image: nginx:alpine
+        container_name: nginx-webserver
+        restart: unless-stopped
+        ports:
+            - "8000:80"
+        volumes:
+            - .:/var/www
+            - ./docker/nginx/conf.d:/etc/nginx/conf.d
+        networks:
+            - laravel
+        depends_on:
+            - app
+
+    db:
+        image: mysql:5.7
+        container_name: mysql-db
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: laravel
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_USER: laravel
+            MYSQL_PASSWORD: laravel
+        ports:
+            - "3307:3306"  # Upewnij się, że port jest dostępny
+        volumes:
+            - dbdata:/var/lib/mysql
+        networks:
+            - laravel
+
+    queue-worker:
+        image: laravel-app  # Używa tego samego obrazu co usługa app
+        container_name: laravel-queue-worker
+        restart: unless-stopped
+        working_dir: /var/www
+        volumes:
+            - .:/var/www
+            - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+        networks:
+            - laravel
+        command: php artisan queue:work --verbose --tries=3
+        depends_on:
+            - app
+            - db
+
+networks:
+    laravel:
+        driver: bridge
+
+volumes:
+    dbdata:
+
+
+
+

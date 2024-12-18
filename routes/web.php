@@ -1,7 +1,8 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\GoogleCalendarController;
 
 /*
 |--------------------------------------------------------------------------
@@ -9,23 +10,31 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 |
 | Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
 |
 */
 
+// Przekierowanie strony głównej na listę zadań
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('tasks.index');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
+// Trasy uwierzytelniania Laravel Breeze
 require __DIR__.'/auth.php';
+
+// Grupa tras chronionych przez middleware 'auth'
+Route::middleware(['auth'])->group(function () {
+    Route::resource('tasks', TaskController::class);
+    Route::get('tasks/share/{task}', [TaskController::class, 'share'])->name('tasks.share');
+    Route::get('tasks/history/{task}', [TaskController::class, 'history'])->name('tasks.history');
+    Route::post('tasks/add-to-google-calendar/{task}', [TaskController::class, 'addToGoogleCalendar'])->name('tasks.addToGoogleCalendar');
+
+    // Trasy dla Google Calendar
+    Route::get('google-calendar/connect', [GoogleCalendarController::class, 'redirectToGoogle'])->name('google-calendar.connect');
+    Route::get('google-calendar/callback', [GoogleCalendarController::class, 'handleGoogleCallback'])->name('google-calendar.callback');
+
+});
+
+// Trasy publiczne
+Route::get('tasks/public/{token}', [TaskController::class, 'publicShow'])->name('tasks.public.show');

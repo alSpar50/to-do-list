@@ -7,6 +7,13 @@
 import axios from 'axios';
 window.axios = axios;
 
+/* resources/css/app.css */
+import 'bootstrap/dist/css/bootstrap.min.css';
+import * as bootstrap from 'bootstrap';
+
+/* Możesz dodać własne style poniżej */
+
+
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 /**
