@@ -1,66 +1,391 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# To-Do List Laravel Application
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Opis
 
-## About Laravel
+Aplikacja To-Do List stworzona w Laravel z wykorzystaniem Docker. Umożliwia zarządzanie zadaniami, ich edycję, udostępnianie oraz integrację z Google Calendar.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Technologie
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Laravel 10.x
+- PHP 8.1
+- MySQL 5.7
+- Nginx
+- Docker & Docker Compose
+- Vite (Frontend)
+- Breeze
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Wymagania
 
-## Learning Laravel
+- [Docker Desktop](https://www.docker.com/products/docker-desktop)
+- [Docker Compose](https://docs.docker.com/compose/)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Instalacja
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Opcja 1: Użycie Docker
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. **Sklonuj repozytorium:**
 
-## Laravel Sponsors
+    ```bash
+    git clone https://github.com/alSpar50/to-do-list.git
+    cd to-do-list
+    ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+2. **Skopiuj plik (zawartość) `.env.example` do `.env`:**
 
-### Premium Partners
+    ```bash
+    cp .env.example .env
+    ```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+3. **Skonfiguruj zmienne środowiskowe w `.env`:**
 
-## Contributing
+    - **Baza Danych:**
+        ```env
+        DB_CONNECTION=mysql
+        DB_HOST=db
+        DB_PORT=3306
+        DB_DATABASE=laravel
+        DB_USERNAME=laravel
+        DB_PASSWORD=laravel
+        ```
+    - **Mailer:**
+      Upewnij się, że ustawienia SMTP są poprawne. Należy tam podać dane od swojego dostawcy poczty. Zwróć też uwagę na dane do Google Calendard. W CLIENT ID oraz CLIENT SECRET należy podać dane z Google Developer Console
+    - **Google Calendar:**
+        ```env
+        GOOGLE_CALENDAR_CLIENT_ID=your_google_client_id
+        GOOGLE_CALENDAR_CLIENT_SECRET=your_google_client_secret
+        GOOGLE_CALENDAR_REDIRECT_URI=http://localhost:8000/google-calendar/callback
+        GOOGLE_CALENDAR_DEFAULT_TIMEZONE=Europe/Warsaw
+        ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+4. **Uruchom kontenery Docker:**
 
-## Code of Conduct
+    ```bash
+    docker-compose up -d
+    ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+   **Uwaga:** Uruchomienie z flagą `-d` (detached mode) pozwala kontenerom działać w tle.
 
-## Security Vulnerabilities
+5. **Generuj klucz aplikacji:**
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+    ```bash
+    docker-compose exec app php artisan key:generate
+    ```
 
-## License
+6. **Uruchom migracje bazy danych:**
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+    ```bash
+    docker-compose exec app php artisan migrate
+    ```
+
+7. **Zainstaluj zależności frontendowe i zbuduj zasoby produkcyjne:**
+
+    ```bash
+    docker-compose exec app npm install
+    docker-compose exec app npm run build
+    ```
+
+8. **Queue Worker jest uruchamiany automatycznie jako osobna usługa (`laravel-queue-worker`).**
+
+9. **Dostęp do aplikacji:**
+
+   Otwórz przeglądarkę i przejdź do [http://localhost:8000/tasks](http://localhost:8000/tasks)
+   Załóż konto podając nazwę, maila oraz hasło. Po tym dostaniesz się do aplikacji to-do-list. W razie problemu (gdyby załadowała się inna strona, np. /dashboard z błędem 404 Not Found, należy w przeglądarce po prostu przejść do /tasks)
+
+### Opcja 2: Uruchomienie Lokalnie (bez Docker)
+
+1. **Sklonuj repozytorium:**
+
+    ```bash
+    git clone https://github.com/twoje-konto/todo-list.git
+    cd todo-list
+    ```
+
+2. **Skopiuj plik `.env.example` do `.env`:**
+
+    ```bash
+    cp .env.example .env
+    ```
+
+3. **Skonfiguruj zmienne środowiskowe w `.env`:**
+
+    - **Baza Danych:**
+        ```env
+        DB_CONNECTION=mysql
+        DB_HOST=127.0.0.1
+        DB_PORT=3306
+        DB_DATABASE=todo_list_db
+        DB_USERNAME=root
+        DB_PASSWORD=*** 
+        ```
+    - **Mailer:**
+      Upewnij się, że ustawienia SMTP są poprawne.
+    - **Google Calendar:**
+        ```env
+        GOOGLE_CALENDAR_CLIENT_ID=your_google_client_id
+        GOOGLE_CALENDAR_CLIENT_SECRET=your_google_client_secret
+        GOOGLE_CALENDAR_REDIRECT_URI=http://localhost:8000/google-calendar/callback
+        GOOGLE_CALENDAR_DEFAULT_TIMEZONE=Europe/Warsaw
+        ```
+
+4. **Zainstaluj zależności aplikacji:**
+
+    ```bash
+    composer install
+    npm install
+    npm run build
+    ```
+
+5. **Generuj klucz aplikacji:**
+
+    ```bash
+    php artisan key:generate
+    ```
+
+6. **Uruchom migracje bazy danych:**
+
+    ```bash
+    php artisan migrate
+    ```
+
+7. **Uruchom queue worker:**
+
+   W nowym terminalu lub PowerShell, uruchom queue worker:
+
+    ```bash
+    php artisan queue:work
+    ```
+
+8. **Uruchom serwer lokalny Laravel w kolejnym terminalu:**
+
+    ```bash
+    php artisan serve --host=127.0.0.1 --port=8000
+    ```
+
+9. **Dostęp do aplikacji:**
+
+   Otwórz przeglądarkę i przejdź do [http://localhost:8000/tasks](http://localhost:8000/tasks) - w razie problemów spójrz poprzedni sposób.
+
+## **9. Dodatkowe Wskazówki**
+
+### **a. Monitorowanie Logów Kontenerów**
+
+Regularnie sprawdzaj logi kontenerów, aby szybko identyfikować i rozwiązywać problemy:
+
+```bash
+docker-compose logs -f app
+docker-compose logs -f queue-worker
+docker-compose logs -f db
+docker-compose logs -f webserver
+
+
+Mój przykładowy .env (bez klucza i haseł):
+
+APP_NAME=Laravel
+APP_ENV=local
+APP_KEY=base64:########################################
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+
+LOG_CHANNEL=stack
+LOG_DEPRECATIONS_CHANNEL=null
+LOG_LEVEL=debug
+
+#poniższa sekcja jest już przygotowana dla dockera. Jakby ktoś chciał uruchomić w lokalnym środowisku bez dockera, to trzeba sobie postawić samemu bazę MySQL i umieścić tu odpowiednie dane.
+
+DB_CONNECTION=mysql
+DB_HOST=db
+DB_PORT=3306
+DB_DATABASE=laravel
+DB_USERNAME=laravel
+DB_PASSWORD=laravel
+
+BROADCAST_DRIVER=log
+CACHE_DRIVER=file
+FILESYSTEM_DISK=local
+QUEUE_CONNECTION=database
+SESSION_DRIVER=file
+SESSION_LIFETIME=120
+
+MEMCACHED_HOST=127.0.0.1
+
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.dpoczta.pl
+MAIL_PORT=25
+MAIL_USERNAME=?????@dpoczta.pl
+MAIL_PASSWORD=###################
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS="?????@dpoczta.pl"
+MAIL_FROM_NAME="${APP_NAME}"
+
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_DEFAULT_REGION=us-east-1
+AWS_BUCKET=
+AWS_USE_PATH_STYLE_ENDPOINT=false
+
+PUSHER_APP_ID=
+PUSHER_APP_KEY=
+PUSHER_APP_SECRET=
+PUSHER_HOST=
+PUSHER_PORT=443
+PUSHER_SCHEME=https
+PUSHER_APP_CLUSTER=mt1
+
+VITE_APP_NAME="${APP_NAME}"
+VITE_PUSHER_APP_KEY="${PUSHER_APP_KEY}"
+VITE_PUSHER_HOST="${PUSHER_HOST}"
+VITE_PUSHER_PORT="${PUSHER_PORT}"
+VITE_PUSHER_SCHEME="${PUSHER_SCHEME}"
+VITE_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
+
+GOOGLE_CALENDAR_CLIENT_ID=your_google_client_id #należy zmienić te dane na odpowiednie czyli te z Google Developers Console. Te dane musi dostarczyć Wasz programista/informatyk.  
+GOOGLE_CALENDAR_CLIENT_SECRET=your_google_client_secret #należy zmienić te dane na odpowiednie -||-
+GOOGLE_CALENDAR_REDIRECT_URI=http://localhost:8000/google-calendar/callback
+GOOGLE_CALENDAR_DEFAULT_TIMEZONE=Europe/Warsaw
+
+
+===============================================================
+W razie problemów umieszczam zawartość kilku kluczowych plików:
+
+Dockerfile:
+
+# Użyj oficjalnego obrazu PHP jako bazowego
+FROM php:8.1-fpm
+
+# Ustaw zmienną środowiskową do zainstalowania narzędzi potrzebnych do budowy
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Zainstaluj zależności systemowe oraz rozszerzenia wymagane przez gd i mbstring
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libwebp-dev \
+    libxpm-dev \
+    libxml2-dev \
+    libonig-dev \
+    locales \
+    zip \
+    jpegoptim \
+    optipng \
+    pngquant \
+    gifsicle \
+    vim \
+    unzip \
+    git \
+    curl \
+    libzip-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Konfiguracja GD z obsługą FreeType, JPEG, WebP i XPM
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp --with-xpm
+
+# Zainstaluj rozszerzenia PHP
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+
+# Zainstaluj Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Ustaw katalog roboczy
+WORKDIR /var/www
+
+# Skopiuj pliki aplikacji
+COPY . /var/www
+
+# Zainstaluj zależności aplikacji
+RUN composer install --optimize-autoloader --no-dev
+
+# Zainstaluj zależności frontendowe i zbuduj zasoby produkcyjne
+RUN apt-get update && apt-get install -y npm && rm -rf /var/lib/apt/lists/*
+RUN npm install
+RUN npm run build
+
+# Ustaw uprawnienia
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+
+# Eksponuj port 9000
+EXPOSE 9000
+
+# Uruchom PHP-FPM
+CMD ["php-fpm"]
+
+
+
+======================================================================================
+docker-compose.yml
+
+version: '3.8'  # Możesz usunąć wersję, jeśli Docker Compose to zaleca. Te nowsze Dockery chyba nawet wymagają aby tę linijkę usunąć więc w razie czego najlepiej zaczynać bez tego.
+
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: laravel-app
+        container_name: laravel-app
+        restart: unless-stopped
+        working_dir: /var/www
+        volumes:
+            - .:/var/www
+            - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+        networks:
+            - laravel
+        depends_on:
+            - db
+
+    webserver:
+        image: nginx:alpine
+        container_name: nginx-webserver
+        restart: unless-stopped
+        ports:
+            - "8000:80"
+        volumes:
+            - .:/var/www
+            - ./docker/nginx/conf.d:/etc/nginx/conf.d
+        networks:
+            - laravel
+        depends_on:
+            - app
+
+    db:
+        image: mysql:5.7
+        container_name: mysql-db
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: laravel
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_USER: laravel
+            MYSQL_PASSWORD: laravel
+        ports:
+            - "3307:3306"  # Upewnij się, że port jest dostępny
+        volumes:
+            - dbdata:/var/lib/mysql
+        networks:
+            - laravel
+
+    queue-worker:
+        image: laravel-app  # Używa tego samego obrazu co usługa app
+        container_name: laravel-queue-worker
+        restart: unless-stopped
+        working_dir: /var/www
+        volumes:
+            - .:/var/www
+            - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+        networks:
+            - laravel
+        command: php artisan queue:work --verbose --tries=3
+        depends_on:
+            - app
+            - db
+
+networks:
+    laravel:
+        driver: bridge
+
+volumes:
+    dbdata:
